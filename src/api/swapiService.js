@@ -9,22 +9,24 @@ export async function fetchData() {
   }
 }
 
-export async function getResidents(data){
+export async function getResidents(data) {
   try {
-      data.forEach(async (planet) => {
-      let allDataPromises =  planet.residents.map(async (item) => {
-        const itemReq = await axios.get(item);
-        const itemResponse = await itemReq.data.name;
-        return itemResponse
-      });  
-      planet['resident_names_from_api'] = (await Promise.all(allDataPromises)).toString();
-    });
+    await Promise.all(
+      data.map(async (planet) => {
+        const residentPromises = planet.residents.map(async (item) => {
+          const response = await axios.get(item);
+          return response.data.name;
+        });
+        const residentNames = await Promise.all(residentPromises);
+        planet['resident_names_from_api'] = residentNames.join(', ');
+      })
+    );
   } catch (error) {
     console.error('Error fetching data:', error);
   }
- return data;
-} 
-
+  
+  return data;
+}
 
  
 

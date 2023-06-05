@@ -8,11 +8,11 @@
         <thead>
           <tr>
             <th @click="sort('name')">Name
-              <span v-if="sortBy == 'name'" class="material-icons">{{ arrowIconName }}</span>
+              <span v-if="sortBy == 'name'" class="material-icons">{{ sortIndicator }}</span>
               <span v-else class="material-icons">sort</span>
             </th>
             <th @click="sort('climate')">Climate
-              <span v-if="sortBy == 'climate'" class="material-icons">{{ arrowIconName }}</span>
+              <span v-if="sortBy == 'climate'" class="material-icons">{{ sortIndicator }}</span>
               <span v-else class="material-icons">sort</span>
             </th>
             <th>Diameter</th>
@@ -60,36 +60,43 @@ export default defineComponent({
     const data = ref([]); // Holds the API data
     const sortBy = ref(null); // Holds the current sorting column
     const sortDesc = ref(false); // Determines whether to sort in descending order
-    const arrowIconName = ref("arrow_drop_up");
 
     onMounted(async () => {
       try {
         const response = await fetchData();
-        const rawData =  response;
-        const formattedWithResidentsFromAPI = await getResidents(rawData)
-        setTimeout(() => {
-          data.value = formattedWithResidentsFromAPI
-          loading.value = false
-        }, 1500 );
+        const rawData = response;
+        const formattedWithResidentsFromAPI = await getResidents(rawData);
+        data.value = formattedWithResidentsFromAPI;
       } catch (error) {
         console.error('Error:', error);
+      } finally {
+        loading.value = false;
       }
     });
+
 
     const sortedData = computed(() => {
       return data.value
     })
+
+    const sortIndicator = computed(() => {
+      if (sortBy.value === null || sortDesc.value) {
+        return "arrow_drop_down";
+      } else {
+        return "arrow_drop_up";
+      }
+    });
 
     // Watch the sortBy and sortDesc refs for changes and sort the data accordingly
     watch([sortBy, sortDesc], () => {
       if (sortBy.value) {
         data.value.sort((a, b) => {
           const modifier = sortDesc.value ? -1 : 1;
-          modifier === 1 ? arrowIconName.value = "arrow_drop_up" : arrowIconName.value = "arrow_drop_down";
-          if (a[sortBy.value] < b[sortBy.value]) return -1 * modifier;
-          if (a[sortBy.value] > b[sortBy.value]) return 1 * modifier;
-          return 0;
+          const valueA = a[sortBy.value];
+          const valueB = b[sortBy.value];
+          return modifier * valueA.localeCompare(valueB);
         });
+
       }
     });
 
@@ -102,13 +109,12 @@ export default defineComponent({
       }
     };
 
-    // Return the reactive data and methods
     return {
       data,
       sortBy,
       sortDesc,
       sortedData,
-      arrowIconName,
+      sortIndicator,
       loading,
       formatDate,
       sort
