@@ -64,8 +64,8 @@ export default defineComponent({
     onMounted(async () => {
       try {
         const response = await fetchData();
-        const rawData = response;
-        const formattedWithResidentsFromAPI = await getResidents(rawData);
+        const copyRawData = response;
+        const formattedWithResidentsFromAPI = await getResidents(copyRawData);
         data.value = formattedWithResidentsFromAPI;
       } catch (error) {
         console.error('Error:', error);
