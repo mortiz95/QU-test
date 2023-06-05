@@ -1,5 +1,10 @@
 # qu-test-api-table
 
+## App link
+```
+https://qu-test-api-swapi-table.netlify.app/
+```
+
 ## Project setup
 ```
 npm install
